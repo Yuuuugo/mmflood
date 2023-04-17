@@ -100,8 +100,5 @@ if __name__ == "__main__":
     # train()
 
     ds = RGBFloodDataset("processed_data/", subset="train")
-    train_loader = DataLoader(
-        ds
-    )
-
-    train(dataloader=train_loader(), n_channels=3, name="cifar10")
+    train_loader = DataLoader(ds)
+    train(dataloader=train_loader, n_channels=2, )
