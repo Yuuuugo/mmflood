@@ -129,7 +129,7 @@ class FloodDataset(DatasetBase):
             pair = self.normalization(image=image, mask=label)
             image = pair.get("image")
             label = pair.get("mask")
-        return image.transpose((1,2,0)), label
+        return image.transpose((2,1,0)), label
 
     def __len__(self) -> int:
         return len(self.image_files)
