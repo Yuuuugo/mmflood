@@ -1,12 +1,5 @@
-# MMFlood: A Multimodal Dataset for Flood Delineation from Satellite Imagery.
 
-Code and data access for the MMFlood dataset.
-
-**Last update: 05-2022**
-
-![samples](resources/samples.png)
-
-## Dataset Access and Specifications
+Forked from :  https://github.com/edornd/mmflood
 
 You can download the MMFlood dataset:
 - from Zenodo: [https://zenodo.org/record/6534637](https://zenodo.org/record/6534637)
@@ -93,45 +86,7 @@ Every image also contains the following contextual information, as GDAL metadata
 - `acquisition_date` refers to the acquisition timestamp of the Sentinel-1 image
 - `event_date` refers to official event start date reported by Copernicus EMS
 
-## Code and installation
 
-To run this code, simply clone it into a directory of choice and create a python environment.
-```bash
-git clone git@github.com:edornd/mmflood.git && cd mmflood
-python3 -m venv .venv
-pip install -r requirements.txt
-```
+### Goal (myadd)
 
-Everything goes through the `run` command.
-Run `python run.py --help` for more information about commands and their arguments.
-
-
-### Data preparation
-To prepare the raw data by tiling and preprocessing, you can run:
-`python run.py prepare --data-source [PATH_TO_ACTIVATIONS] --data-processed [DESTINATION]`
-
-
-### Training
-Training uses HuggingFace `accelerate` to provide single-gpu and multi-gpu support.
-To launch on a single GPU:
-```bash
-CUDA_VISIBLE_DEVICES=... python run.py train [ARGS]
-```
-You can find an example script with parameters in [the scripts folder.](scripts/train.sh)
-
-### Testing
-Testing is run on non-tiled images (the preprocessing will format them without tiling).
-You can run the test on a single GPU using the `test` command.
-At the very least, you need to point the script to the output directory.
-If no checkpoint is provided, the best one (according to the monitored metric) will be selected automatically.
-You can also avoid storing outputs with `--no-store-predictions`.
-```bash
-CUDA_VISIBLE_DEVICES=... python run.py test --data-root [PATH_TO_OUTPUT_DIR] [--checkpoint-path [PATH]]
-```
-
-# Data Attribution and Licenses
-For the realization of this project, the following data sources were used:
-- Copernicus EMS ([Manual](https://emergency.copernicus.eu/mapping/sites/default/files/files/JRCTechnicalReport_2020_Manual%20for%20Rapid%20Mapping%20Products_final.pdf))
-- Copernicus Sentinel-1 ([License](https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice))
-- MapZen/TileZen Elevation ([License](https://github.com/tilezen/joerd/blob/master/docs/attribution.md))
-- OpenStreetMap water layers ([License](https://www.openstreetmap.org/copyright))
+Use diffusion model to generate new sample which would help us improving the metrics that were in the paper

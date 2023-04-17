@@ -173,3 +173,10 @@ class WeightedFloodDataset(FloodDataset):
         weight_indices = imread(self.weight_files[index]).squeeze(0).astype(np.uint8)
         weight = self.class_weights[weight_indices]
         return image, label, weight
+
+
+
+if __name__ == "__main__":
+    ds = RGBFloodDataset("processed_data/")
+    for image,mask in ds :
+        print(image.shape, mask.shape)
