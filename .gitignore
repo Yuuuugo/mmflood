@@ -137,3 +137,7 @@ accelerate/*
 *.sh
 ./setup.cfg
 archive
+
+
+raw_data/
+processed_data/
