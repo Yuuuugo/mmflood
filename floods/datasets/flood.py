@@ -7,7 +7,9 @@ from torch import Tensor
 
 from floods.datasets.base import DatasetBase
 from floods.utils.gis import imread
-
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
 
 class FloodDataset(DatasetBase):
 
@@ -21,7 +23,7 @@ class FloodDataset(DatasetBase):
 
     def __init__(self,
                  path: Path,
-                 subset: str = "train",
+                 subset: str = "val",
                  include_dem: bool = False,
                  transform_base: Callable = None,
                  transform_sar: Callable = None,
@@ -36,9 +38,9 @@ class FloodDataset(DatasetBase):
         self.transform_dem = transform_dem
         self.normalization = normalization
         # gather files to build the list of available pairs
-        path = path / subset
-        self.image_files = sorted(glob(str(path / "sar" / "*.tif")))
-        self.label_files = sorted(glob(str(path / "mask" / "*.tif")))
+        path = path + "/" + subset
+        self.image_files = sorted(glob(str(path + "/sar/" +  "*.tif")))
+        self.label_files = sorted(glob(str(path + "/mask/" + "*.tif")))
         assert len(self.image_files) > 0, f"No images found, is the given path correct? ({str(path)})"
         assert len(self.image_files) == len(self.label_files), \
             f"Length mismatch between tiles and masks: {len(self.image_files)} != {len(self.label_files)}"
@@ -178,5 +180,13 @@ class WeightedFloodDataset(FloodDataset):
 
 if __name__ == "__main__":
     ds = RGBFloodDataset("processed_data/")
+    fig, (ax1,ax2) = plt.subplots(1,2, figsize = (10,10))
     for image,mask in ds :
-        print(image.shape, mask.shape)
+        vv = image[:,:,0]
+        vh = image[:,:,1]
+        vvvh = vv - vh
+        rgb = np.concatenate([(vv,),(vh,),(vvvh,)])
+        ax1.imshow(rgb.transpose(1,2,0))
+        ax2.imshow(mask)
+        plt.show()
+        break
