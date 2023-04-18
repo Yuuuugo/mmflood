@@ -4,7 +4,7 @@ from floods.models.consistency_model import ConsistencyModel
 from floods.utils.keras import kerras_boundaries
 from floods.datasets.flood import FloodDataset
 from torch.utils.data import DataLoader
-
+from accelerate import Accelerator
 
 # Implementation of Consistency Model
 # https://arxiv.org/pdf/2303.01469.pdf
@@ -24,11 +24,11 @@ from torchvision.utils import save_image, make_grid
 
 
 def train(
+    accelerator : Accelerator,
     n_epoch: int = 100,
     device="cuda:0",
     dataloader=DataLoader(RGBFloodDataset("processed_data/")),
-    n_channels=1,
-    name="mnist",
+    n_channels=2,
 ):
     model = ConsistencyModel(n_channels, D=256)
     model.to(device)
@@ -39,6 +39,7 @@ def train(
     ema_model.to(device)
     ema_model.load_state_dict(model.state_dict())
 
+    model, optim, dataloader = accelerator.prepare(model, optim, dataloader)
     for epoch in range(1, n_epoch):
         N = math.ceil(math.sqrt((epoch * (150**2 - 4) / n_epoch) + 4) - 1) + 1
         boundaries = kerras_boundaries(7.0, 0.002, N, 80.0).to(device)
@@ -57,7 +58,8 @@ def train(
 
             loss = model.loss(x, z, t_0, t_1, ema_model=ema_model)
 
-            loss.backward()
+            accelerator.backward(loss)
+            #loss.backward()
             if loss_ema is None:
                 loss_ema = loss.item()
             else:
@@ -72,8 +74,8 @@ def train(
 
             pbar.set_description(f"loss: {loss_ema:.10f}, mu: {mu:.10f}")
 
-        model.eval()
-        with torch.no_grad():
+        #model.eval()
+        """with torch.no_grad():
             # Sample 5 Steps
             xh = model.sample(
                 torch.randn_like(x).to(device=device) * 80.0,
@@ -92,13 +94,18 @@ def train(
             grid = make_grid(xh, nrow=4)
             save_image(grid, f"./contents/ct_{name}_sample_2step_{epoch}.png")
 
-            # save model
-            torch.save(model.state_dict(), f"./ct_{name}.pth")
+        """
+        # save model
+        torch.save(model.state_dict(), f"./saved_model/diffusion_model_{epoch}.pth")
 
 
 if __name__ == "__main__":
-    # train()
+    accelerator = Accelerator()
 
     ds = RGBFloodDataset("processed_data/", subset="train")
     train_loader = DataLoader(ds)
-    train(dataloader=train_loader, n_channels=2, )
+    train(
+        accelerator= accelerator,
+        dataloader=train_loader, 
+        n_channels=2, 
+        )
