@@ -141,3 +141,5 @@ archive
 
 raw_data/
 processed_data/
+
+*.pth
