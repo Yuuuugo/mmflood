@@ -2,7 +2,7 @@
 
 
 To see if it is able to use all GPUS efficiently :
-	Time for one epochs using A100 : 
+	Time for one epochs using A100 : 38mn
 
 	Time for one epochs using 2xA100 :
 	
