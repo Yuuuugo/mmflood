@@ -24,13 +24,15 @@ from torchvision.utils import save_image, make_grid
 
 
 def train(
+    model,
     accelerator : Accelerator,
     n_epoch: int = 100,
     dataloader=DataLoader(RGBFloodDataset("processed_data/")),
     n_channels=2,
 ):
-    device = accelerator.device
     model = ConsistencyModel(n_channels, D=256)
+    device = accelerator.device
+    #device = "gpu:0"
     model.to(device)
     optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
@@ -48,6 +50,7 @@ def train(
         loss_ema = None
         model.train()
         for x, _ in pbar:
+            print(x.shape)
             optim.zero_grad()
 
             z = torch.randn_like(x)
