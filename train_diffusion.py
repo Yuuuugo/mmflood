@@ -24,7 +24,6 @@ from torchvision.utils import save_image, make_grid
 
 
 def train(
-    model,
     accelerator : Accelerator,
     n_epoch: int = 20,
     dataloader=DataLoader(RGBFloodDataset("processed_data/")),
