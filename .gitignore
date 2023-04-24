@@ -134,7 +134,6 @@ dmypy.json
 # custom folders/files
 accelerate
 accelerate/*
-*.sh
 ./setup.cfg
 archive
 
