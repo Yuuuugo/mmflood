@@ -1,18 +1,16 @@
 from glob import glob
-from pathlib import Path
 from typing import Callable, Dict, List, Tuple
-
 import numpy as np
-from torch import Tensor
 
+from pathlib import Path
 from floods.datasets.base import DatasetBase
 from floods.utils.gis import imread
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from torch import Tensor
 
 class FloodDataset(DatasetBase):
-
     _name = "flood"
     _categories = {0: "background", 1: "flood"}
     _palette = {0: (0, 0, 0), 1: (255, 255, 255), 255: (255, 0, 255)}
@@ -180,6 +178,8 @@ class WeightedFloodDataset(FloodDataset):
 
 if __name__ == "__main__":
     ds = RGBFloodDataset("processed_data/")
+    print(len(ds))
+    """
     fig, (ax1,ax2) = plt.subplots(1,2, figsize = (10,10))
     for image,mask in ds :
         vv = image[:,:,0]
@@ -190,3 +190,4 @@ if __name__ == "__main__":
         ax2.imshow(mask)
         plt.show()
         break
+    """
