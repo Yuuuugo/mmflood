@@ -26,7 +26,7 @@ from diffusers.training_utils import EMAModel
 from diffusers.utils import check_min_version, is_accelerate_version, is_tensorboard_available, is_wandb_available
 from diffusers.utils.import_utils import is_xformers_available
 from floods.datasets.flood import RGBFloodDataset,FloodDataset, WeightedFloodDataset
-
+from torch.utils.data import DataLoader
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.16.0.dev0")
 
@@ -259,8 +259,6 @@ def parse_args():
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
 
-    if args.dataset_name is None and args.train_data_dir is None:
-        raise ValueError("You must specify either a dataset name from the hub or a train data directory.")
 
     return args
 
@@ -442,38 +440,8 @@ def main(args):
 
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
-    if args.dataset_name is not None:
-        dataset = load_dataset(
-            args.dataset_name,
-            args.dataset_config_name,
-            cache_dir=args.cache_dir,
-            split="train",
-        )
-    else:
-        dataset = load_dataset("imagefolder", data_dir=args.train_data_dir, cache_dir=args.cache_dir, split="train")
-        # See more about loading custom images at
-        # https://huggingface.co/docs/datasets/v2.4.0/en/image_load#imagefolder
 
-    # Preprocessing the datasets and DataLoaders creation.
-    augmentations = transforms.Compose(
-        [
-            transforms.Resize(args.resolution, interpolation=transforms.InterpolationMode.BILINEAR),
-            transforms.CenterCrop(args.resolution) if args.center_crop else transforms.RandomCrop(args.resolution),
-            transforms.RandomHorizontalFlip() if args.random_flip else transforms.Lambda(lambda x: x),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5], [0.5]),
-        ]
-    )
-
-    def transform_images(examples):
-        images = [augmentations(image.convert("RGB")) for image in examples["image"]]
-        return {"input": images}
-
-    logger.info(f"Dataset size: {len(dataset)}")
-
-    dataset.set_transform(transform_images)
-    train_dataloader = torch.utils.data.DataLoader(RGBFloodDataset("processed_data/")),
-
+    train_dataloader = DataLoader(RGBFloodDataset("processed_data/"), batch_size= args.train_batch_size)
     # Initialize the learning rate scheduler
     lr_scheduler = get_scheduler(
         args.lr_scheduler,
@@ -501,7 +469,6 @@ def main(args):
     max_train_steps = args.num_epochs * num_update_steps_per_epoch
 
     logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(dataset)}")
     logger.info(f"  Num Epochs = {args.num_epochs}")
     logger.info(f"  Instantaneous batch size per device = {args.train_batch_size}")
     logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
@@ -547,8 +514,8 @@ def main(args):
                 if step % args.gradient_accumulation_steps == 0:
                     progress_bar.update(1)
                 continue
-
-            clean_images = batch["input"]
+            
+            clean_images = batch[0]
             # Sample noise that we'll add to the images
             noise = torch.randn(clean_images.shape).to(clean_images.device)
             bsz = clean_images.shape[0]
