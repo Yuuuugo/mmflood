@@ -30,8 +30,8 @@ def train(
     n_channels=2,
 ):
     model = ConsistencyModel(n_channels, D=256)
-    device = accelerator.device
-    #device = "gpu:0"
+    #device = accelerator.device
+    device = "gpu:0"
     model.to(device)
     optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
