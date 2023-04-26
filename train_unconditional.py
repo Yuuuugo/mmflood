@@ -441,7 +441,7 @@ def main(args):
     # In distributed training, the load_dataset function guarantees that only one local process can concurrently
     # download the dataset.
 
-    train_dataloader = DataLoader(RGBFloodDataset("processed_data/"), batch_size= args.train_batch_size)
+    train_dataloader = DataLoader(FloodDataset("processed_data/"), batch_size= args.train_batch_size)
     # Initialize the learning rate scheduler
     lr_scheduler = get_scheduler(
         args.lr_scheduler,
@@ -602,6 +602,7 @@ def main(args):
                 if args.use_ema:
                     ema_model.restore(unet.parameters())
 
+                """
                 # denormalize the images and save to tensorboard
                 images_processed = (images * 255).round().astype("uint8")
 
@@ -617,6 +618,7 @@ def main(args):
                         {"test_samples": [wandb.Image(img) for img in images_processed], "epoch": epoch},
                         step=global_step,
                     )
+                """
              # Doesnt want to create intermediary images
 
             if epoch % args.save_model_epochs == 0 or epoch == args.num_epochs - 1:
