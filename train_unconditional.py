@@ -54,16 +54,6 @@ def _extract_into_tensor(arr, timesteps, broadcast_shape):
 def parse_args():
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
-        "--dataset_name",
-        type=str,
-        default=None,
-        help=(
-            "The name of the Dataset (from the HuggingFace hub) to train on (could be your own, possibly private,"
-            " dataset). It can also be a path pointing to a local copy of a dataset in your filesystem,"
-            " or to a folder containing files that HF Datasets can understand."
-        ),
-    )
-    parser.add_argument(
         "--dataset_config_name",
         type=str,
         default=None,
@@ -461,8 +451,8 @@ def main(args):
     # We need to initialize the trackers we use, and also store our configuration.
     # The trackers initializes automatically on the main process.
     if accelerator.is_main_process:
-        run = os.path.split(__file__)[-1].split(".")[0]
-        accelerator.init_trackers(run)
+        #run = os.path.split(__file__)[-1].split(".")[0]
+        accelerator.init_trackers(project_name="MMfloodDiffusion")
 
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -578,6 +568,7 @@ def main(args):
 
         # Generate sample images for visual inspection
         if accelerator.is_main_process:
+            """
             if epoch % args.save_images_epochs == 0 or epoch == args.num_epochs - 1:
                 unet = accelerator.unwrap_model(model)
 
@@ -602,7 +593,6 @@ def main(args):
                 if args.use_ema:
                     ema_model.restore(unet.parameters())
 
-                """
                 # denormalize the images and save to tensorboard
                 images_processed = (images * 255).round().astype("uint8")
 
@@ -618,7 +608,7 @@ def main(args):
                         {"test_samples": [wandb.Image(img) for img in images_processed], "epoch": epoch},
                         step=global_step,
                     )
-                """
+            """
              # Doesnt want to create intermediary images
 
             if epoch % args.save_model_epochs == 0 or epoch == args.num_epochs - 1:
